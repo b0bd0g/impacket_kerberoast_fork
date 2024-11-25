@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 # Impacket - Collection of Python classes for working with network protocols.
 #
-# Copyright Fortra, LLC and its affiliated companies 
-#
-# All rights reserved.
+# Copyright (C) 2023 Fortra. All rights reserved.
 #
 # This software is provided under a slightly modified version
 # of the Apache Software License. See the accompanying LICENSE file
@@ -92,6 +90,7 @@ class GetUserSPNs:
         self.__saveTGS = cmdLineOptions.save
         self.__requestUser = cmdLineOptions.request_user
         self.__stealth = cmdLineOptions.stealth
+        self.__rc4 = cmdLineOptions.rc4
         if cmdLineOptions.hashes is not None:
             self.__lmhash, self.__nthash = cmdLineOptions.hashes.split(':')
 
@@ -313,6 +312,9 @@ class GetUserSPNs:
         if self.__requestUser is not None:
             searchFilter += '(sAMAccountName:=%s)' % self.__requestUser
 
+        if self.__rc4 is True:
+            searchFilter += '(!(msds-supportedencryptiontypes:1.2.840.113556.1.4.804:=24))'
+
         searchFilter += ')'
 
         try:
@@ -507,6 +509,7 @@ if __name__ == '__main__':
                         help='Output filename to write ciphers in JtR/hashcat format. Auto selects -request')
     parser.add_argument('-ts', action='store_true', help='Adds timestamp to every logging output.')
     parser.add_argument('-debug', action='store_true', help='Turn DEBUG output ON')
+    parser.add_argument('-rc4', action='store_true', default=False, help='Only requests users who do not support AES (avoid MDI downgrade detection)')
 
     group = parser.add_argument_group('authentication')
 
